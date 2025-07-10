@@ -63,3 +63,9 @@ class NodeSelectionTask:
                 resistance[i, j] = laplacian_inv[i, i] + laplacian_inv[j, j] \
                                    - 2 * laplacian_inv[i, j]
         return self._kernel_score(resistance)
+
+    def diffusion_score(self, kappa2: float):
+        if self.laplacian is None:
+            self.laplacian = self._get_laplacian()
+        diffusion_kernel = np.exp(-0.5 * kappa2 * self.laplacian)
+        return self._kernel_score(-diffusion_kernel)
