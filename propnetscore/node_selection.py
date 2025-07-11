@@ -1,5 +1,5 @@
 import numpy as np
-from utils import standard_basis_vec
+from .utils import standard_basis_vec
 
 class NodeSelectionTask:
     def __init__(
@@ -38,19 +38,19 @@ class NodeSelectionTask:
         float
             Score
         """
-        expected_residual = cnd_kernel @ self.node_probs
+        expected_residual = (cnd_kernel @ self.node_probs)[self.true_node]
         regularisation = 0.5 * self.node_probs @ cnd_kernel @ self.node_probs
         return expected_residual - regularisation
 
     def logarithmic_score(self):
-        return -np.log(self.node_probs[self.true_node])
+        return float(-np.log(self.node_probs[self.true_node]))
 
     def brier_score(self):
         outcome = standard_basis_vec(
             size=len(self.node_probs), i=self.true_node
         )
         residuals = outcome - self.node_probs
-        return np.dot(residuals, residuals)
+        return float(np.dot(residuals, residuals))
 
     def resistance_score(self):
         if self.laplacian is None:
@@ -62,10 +62,10 @@ class NodeSelectionTask:
             for j in range(n):
                 resistance[i, j] = laplacian_inv[i, i] + laplacian_inv[j, j] \
                                    - 2 * laplacian_inv[i, j]
-        return self._kernel_score(resistance)
+        return float(self._kernel_score(resistance))
 
     def diffusion_score(self, kappa2: float):
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
         diffusion_kernel = np.exp(-0.5 * kappa2 * self.laplacian)
-        return self._kernel_score(-diffusion_kernel)
+        return float(self._kernel_score(-diffusion_kernel))
