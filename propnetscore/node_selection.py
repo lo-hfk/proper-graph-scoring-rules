@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.linalg import expm
 from .utils import standard_basis_vec
 
 class NodeSelectionTask:
@@ -31,7 +32,6 @@ class NodeSelectionTask:
         ----------
         cnd_kernel : np.ndarray (n, n)
             Conditionally negative definite kernel matrix.
-            All entries must be non-negative.
 
         Returns
         -------
@@ -67,5 +67,5 @@ class NodeSelectionTask:
     def diffusion_score(self, kappa2: float):
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
-        diffusion_kernel = np.exp(-0.5 * kappa2 * self.laplacian)
-        return float(self._kernel_score(-diffusion_kernel))
+        diffusion_kernel = expm(-0.5 * kappa2 * self.laplacian)
+        return float(self._kernel_score(1 - diffusion_kernel))
