@@ -68,4 +68,4 @@ class NodeSelectionTask:
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
         diffusion_kernel = expm(-0.5 * kappa2 * self.laplacian)
-        return float(self._kernel_score(1 - diffusion_kernel))
+        return float(self._kernel_score(-diffusion_kernel))
