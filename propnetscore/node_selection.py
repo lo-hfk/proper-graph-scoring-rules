@@ -67,6 +67,14 @@ class NodeSelectionTask:
         residuals = outcome - self.node_probs
         return float(np.dot(residuals, residuals))
 
+    def laplace_score(self):
+        """
+        Proper scoring rule based on the Laplacian
+        """
+        if self.laplacian is None:
+            self.laplacian = self._get_laplacian()
+        return float(self._kernel_score(-self.laplacian))
+
     def resistance_score(self):
         """
         Proper scoring rule based on resistance distance
