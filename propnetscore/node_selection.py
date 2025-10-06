@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.linalg import expm, matrix_power
+from numpy.linalg import matrix_power
+from scipy.linalg import expm
 from .utils import standard_basis_vec
 
 class NodeSelectionTask:
@@ -24,6 +25,8 @@ class NodeSelectionTask:
         self.degree_matrix = None  # compute only when necessary
         self.laplacian = None  # compute only when necessary
         self.normalised_laplacian = None  # compute only when necessary
+        self.laplacian_inv = None  # compute only when necessary
+        self.resistance = None  # compute only when necessary
 
     def _get_degree_matrix(self):
         return np.diag(np.sum(self.adjacency_matrix, axis=1))
@@ -81,13 +84,12 @@ class NodeSelectionTask:
         """
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
-        laplacian_inv = np.linalg.pinv(self.laplacian)
-        resistance = np.zeros((self.size, self.size))
-        for i in range(self.size):
-            for j in range(self.size):
-                resistance[i, j] = laplacian_inv[i, i] + laplacian_inv[j, j] \
-                                   - 2 * laplacian_inv[i, j]
-        return float(self._kernel_score(resistance))
+        if self.laplacian_inv is None:
+            self.laplacian_inv = np.linalg.pinv(self.laplacian)
+        if self.resistance is None:
+            diagonal = np.diag(self.laplacian_inv)
+            self.resistance = diagonal[:, None] + diagonal[None, :] - 2 * self.laplacian_inv
+        return self._kernel_score(self.resistance)
 
     def diffusion_score(self, kappa2: float):
         """
