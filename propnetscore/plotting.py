@@ -9,13 +9,14 @@ def plot_task(
     G: nx.Graph,
     node_probs: np.ndarray,
     true_node: int,
-    labels: bool = True,
+    labels: str | None = "id",  # "id", "prob", or None
     colorbar: bool = True,
     contrast: float = 1.0,
     prob_color: str = 'Blues',
     true_color: str = 'red',
     scores: list = [],
-    score_pos: str = "bottom"  # "top" or "bottom"
+    score_pos: str = "bottom",  # "top" or "bottom"
+    node_size: int = 500
 ):
     if len(node_probs) != G.number_of_nodes():
         raise ValueError("Length of node_probs must match number of nodes in G")
@@ -37,12 +38,20 @@ def plot_task(
 
     # Draw network
     nx.draw_networkx_edges(G, pos, ax=ax)
-    nx.draw_networkx_nodes(G, pos, node_color=colors, edgecolors='black', linewidths=1, node_size=500, ax=ax)
+    nx.draw_networkx_nodes(G, pos, node_color=colors, edgecolors='black',
+                           linewidths=1, node_size=node_size, ax=ax)
     nx.draw_networkx_nodes(G, pos, nodelist=[true_node], node_color=[colors[true_node]],
-                           edgecolors=true_color, linewidths=4, node_size=500, ax=ax)
+                           edgecolors=true_color, linewidths=4, node_size=node_size, ax=ax)
 
-    if labels:
+    # Draw labels
+    if labels == "id":
         nx.draw_networkx_labels(G, pos, ax=ax)
+    elif labels == "prob":
+        # Format probabilities with up to 2 decimals, but suppress trailing zeros
+        prob_labels = {i: f"{p:.2f}".rstrip('0').rstrip('.') for i, p in enumerate(node_probs)}
+        # Compute a font size that fits inside the node circles
+        font_size = max(6, np.sqrt(node_size) / 8)
+        nx.draw_networkx_labels(G, pos, labels=prob_labels, font_size=font_size, ax=ax)
 
     fig = ax.figure
     cbar = None
@@ -92,8 +101,6 @@ def plot_task(
             f"{name.ljust(name_width)} : {val.rjust(value_width)}"
             for name, val in score_texts
         )
-
-
 
         # Compute y position based on user choice
         if score_pos.lower() == "top":

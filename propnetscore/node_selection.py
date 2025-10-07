@@ -1,6 +1,8 @@
 import numpy as np
 from numpy.linalg import matrix_power
 from scipy.linalg import expm
+from win32con import HELP_SETPOPUP_POS
+
 from .utils import standard_basis_vec
 
 class NodeSelectionTask:
@@ -44,12 +46,16 @@ class NodeSelectionTask:
         sqrt_degree_matrix = np.sqrt(self.degree_matrix)
         return sqrt_degree_matrix @ self.laplacian @ sqrt_degree_matrix
 
-    def _kernel_score(self, cnd_kernel: np.ndarray):
+    def _kernel_score(self, cnd_kernel: np.ndarray, convention: str | None = None):
         """
         Parameters
         ----------
         cnd_kernel : np.ndarray (n, n)
             Conditionally negative definite kernel matrix.
+        convention : str
+            Defaults to the definition by [Gneiting/Raftery, 2007].
+            If set to "positive", subtract cnd_kernel[true_node, true_node]/2 which ensures non-negative scores
+                [Ziegel/Ginsbourger/Duembgen, 2022].
 
         Returns
         -------
@@ -58,7 +64,11 @@ class NodeSelectionTask:
         """
         expected_residual = (cnd_kernel @ self.node_probs)[self.true_node]
         regularisation = 0.5 * self.node_probs @ cnd_kernel @ self.node_probs
-        return expected_residual - regularisation
+        if convention == "positive":
+            extra_term = - 0.5 * cnd_kernel[self.true_node, self.true_node]
+        else:
+            extra_term = 0
+        return expected_residual - regularisation + extra_term
 
     def logarithmic_score(self):
         return float(-np.log(self.node_probs[self.true_node]))
@@ -70,13 +80,18 @@ class NodeSelectionTask:
         residuals = outcome - self.node_probs
         return float(np.dot(residuals, residuals))
 
-    def laplace_score(self):
+    def laplace_score(self, convention: str | None = None):
         """
         Proper scoring rule based on the Laplacian
+
+        Parameters
+        ----------
+        convention : str
+            Kernel score convention (None or "positive")
         """
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
-        return float(self._kernel_score(-self.laplacian))
+        return float(self._kernel_score(-self.laplacian, convention))
 
     def resistance_score(self):
         """
@@ -89,9 +104,9 @@ class NodeSelectionTask:
         if self.resistance is None:
             diagonal = np.diag(self.laplacian_inv)
             self.resistance = diagonal[:, None] + diagonal[None, :] - 2 * self.laplacian_inv
-        return self._kernel_score(self.resistance)
+        return float(self._kernel_score(self.resistance))
 
-    def diffusion_score(self, kappa2: float):
+    def diffusion_score(self, kappa2: float, convention: str | None = None):
         """
         Proper scoring rule based on the diffusion kernel
 
@@ -99,13 +114,15 @@ class NodeSelectionTask:
         ----------
         kappa2 : float (non-negative)
             Inverse length scale
+        convention : str
+            Kernel score convention (None or "positive")
         """
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
         diffusion_kernel = expm(-0.5 * kappa2 * self.laplacian)
-        return float(self._kernel_score(-diffusion_kernel))
+        return float(self._kernel_score(-diffusion_kernel, convention))
 
-    def random_walk_score(self, alpha: float, p: int):
+    def random_walk_score(self, alpha: float, p: int, convention: str | None = None):
         """
         Proper scoring rule based on the lazy random walk kernel
             [Smola/Kondor, 2003]
@@ -116,10 +133,12 @@ class NodeSelectionTask:
             Laziness parameter
         p : int (non-negative)
             Number of steps of the random walk
+        convention : str
+            Kernel score convention (None or "positive")
         """
         if self.normalised_laplacian is None:
             self.normalised_laplacian = self._get_normalised_laplacian()
         random_walk_kernel = matrix_power(
             np.eye(self.size) - (1 - alpha) * self.normalised_laplacian, p
         )
-        return float(self._kernel_score(-random_walk_kernel))
+        return float(self._kernel_score(-random_walk_kernel, convention))
