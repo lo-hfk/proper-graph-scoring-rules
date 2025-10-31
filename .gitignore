@@ -294,3 +294,7 @@ http-client.private.env.json
 
 # Mac OS trash
 .DS_Store
+
+# gitignore Nathan's playground files
+examples/laplacian_julia.ipynb
+examples/krylov_exponential.ipynb
