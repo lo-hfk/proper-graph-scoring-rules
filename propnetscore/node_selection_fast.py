@@ -3,6 +3,8 @@ import numpy as np
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import expm_multiply
 from propnetscore.utils import standard_basis_vec
+from juliacall import Main as jl
+import time
 
 
 class NodeSelectionTaskFast(NodeSelectionTask):
@@ -17,13 +19,15 @@ class NodeSelectionTaskFast(NodeSelectionTask):
         """
         Julia implementation of the approximate laplacian inverse.
         """
-        # load juliacall and julia packages
-        from juliacall import Main as jl
+        # load julia packages
+        start = time.time()
         jl.seval("using Laplacians")
         jl.seval("using LinearAlgebra")
         jl.seval("using SparseArrays")
+        print(f" --- Loaded Julia packages in {time.time() - start:.3f}s")
 
         # transport sparse adjacency matrix to julia
+        start = time.time()
         n = sparse_adjacency_matrix.shape[0]
         indptr_py = (sparse_adjacency_matrix.indptr + 1).astype(np.int64) # julia uses 1-based indexing
         indices_py = (sparse_adjacency_matrix.indices + 1).astype(np.int64) # julia uses 1-based indexing
@@ -32,12 +36,15 @@ class NodeSelectionTaskFast(NodeSelectionTask):
         indices_jl = jl.Vector(indices_py) # convert to julia vector
         data_jl = jl.Vector(data_py) # convert to julia vector
         adjacency_jl = jl.SparseMatrixCSC(n, n, indptr_jl, indices_jl, data_jl)
+        print(f" --- Transferred sparse adjacency matrix to Julia in {time.time() - start:.3f}s")
 
         # initialize laplacian solver and compute laplacian inverse
+        start = time.time()
         lap_solver = jl.approxchol_lap(adjacency_jl)
         I_py = np.eye(n, dtype=np.float64) # unit matrix
         L_inverse_list = [lap_solver(I_py[:, i]) for i in range(n)]
         L_inverse_py = np.column_stack([np.array(col) for col in L_inverse_list])
+        print(f" --- Computed approximate laplacian inverse in Julia in {time.time() - start:.3f}s")
         return L_inverse_py
 
     def resistance_score_fast(self):
@@ -81,15 +88,13 @@ class NodeSelectionTaskFast(NodeSelectionTask):
             extra_term = 0
         return expected_residual - regularisation + extra_term
 
-    def diffusion_score_fast(self, node_probs, kappa2: float, convention: str | None = None):
+    def diffusion_score_fast(self, kappa2: float, convention: str | None = None):
         """
         Proper scoring rule based on the diffusion kernel but with a fast implementation based on expm_multiply
         (only matrix-vector products instead of full matrix exponentiation).
 
         Parameters
         ----------
-        node_probs : np.ndarray
-            Predicted node probabilities
         kappa2 : float (non-negative)
             Inverse length scale
         convention : str
@@ -101,9 +106,9 @@ class NodeSelectionTaskFast(NodeSelectionTask):
             self.sparse_laplacian = csc_matrix(self.laplacian)
         if convention == "positive":
             true_diag = - expm_multiply(-0.5 * kappa2 * self.sparse_laplacian,
-                                        standard_basis_vec(size=len(node_probs), i=self.true_node))[self.true_node]
+                                        standard_basis_vec(size=len(self.node_probs), i=self.true_node))[self.true_node]
         else:
             true_diag = None
-        minus_diffusion_kernel_x_node_probs = - expm_multiply(-0.5 * kappa2 * self.sparse_laplacian, node_probs)
+        minus_diffusion_kernel_x_node_probs = - expm_multiply(-0.5 * kappa2 * self.sparse_laplacian, self.node_probs)
         return float(self._kernel_score_fast(minus_diffusion_kernel_x_node_probs, convention, true_diag))
 
