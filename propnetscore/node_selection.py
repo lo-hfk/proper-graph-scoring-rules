@@ -1,8 +1,6 @@
 import numpy as np
 from numpy.linalg import matrix_power
 from scipy.linalg import expm
-from win32con import HELP_SETPOPUP_POS
-
 from .utils import standard_basis_vec
 
 class NodeSelectionTask:

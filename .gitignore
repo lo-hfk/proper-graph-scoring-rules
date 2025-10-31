@@ -290,4 +290,11 @@ http-client.private.env.json
 # Apifox Helper cache
 .idea/.cache/.Apifox_Helper
 .idea/ApifoxUploaderProjectSetting.xml
+.idea/
 
+# Mac OS trash
+.DS_Store
+
+# gitignore Nathan's playground files
+examples/laplacian_julia.ipynb
+examples/krylov_exponential.ipynb
