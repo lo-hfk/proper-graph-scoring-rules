@@ -68,6 +68,22 @@ class NodeSelectionTask:
             extra_term = 0
         return expected_residual - regularisation + extra_term
 
+    def top_k_accuracy(self, k=1):
+        top_k_indices = np.argsort(-self.node_probs)[:k]
+        return float(self.true_node in top_k_indices)
+
+    def top_k_error_rate(self, k=1):
+        top_k_indices = np.argsort(-self.node_probs)[:k]
+        return 1 - self.top_k_accuracy(k=k)
+
+    def rank_score(self):
+        sorted_indices = np.argsort(-self.node_probs)
+        rank = np.where(sorted_indices == self.true_node)[0][0] + 1
+        return rank
+
+    def inverse_rank_score(self):
+        return 1. / self.rank_score()
+
     def logarithmic_score(self):
         return float(-np.log(self.node_probs[self.true_node]))
 
