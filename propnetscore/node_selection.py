@@ -89,7 +89,7 @@ class NodeSelectionTask:
 
     def brier_score(self):
         outcome = standard_basis_vec(
-            size=len(self.node_probs), i=self.true_node
+            size=self.size, i=self.true_node
         )
         residuals = outcome - self.node_probs
         return float(np.dot(residuals, residuals))
@@ -105,7 +105,8 @@ class NodeSelectionTask:
         """
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
-        return float(self._kernel_score(-self.laplacian, convention))
+        normalisation_factor = 2 / self.size
+        return float(self._kernel_score(-self.laplacian, convention) * normalisation_factor)
 
     def resistance_score(self):
         """
@@ -118,7 +119,8 @@ class NodeSelectionTask:
         if self.resistance is None:
             diagonal = np.diag(self.laplacian_inv)
             self.resistance = diagonal[:, None] + diagonal[None, :] - 2 * self.laplacian_inv
-        return float(self._kernel_score(self.resistance))
+        normalisation_factor = self.size
+        return float(self._kernel_score(self.resistance) * normalisation_factor)
 
     def diffusion_score(self, kappa2: float, convention: str | None = None):
         """
@@ -133,8 +135,9 @@ class NodeSelectionTask:
         """
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
-        diffusion_kernel = expm(-0.5 * kappa2 * self.laplacian)
-        return float(self._kernel_score(-diffusion_kernel, convention))
+        diffusion_kernel = expm(-0.5 * kappa2 * (self.laplacian - np.eye(self.size)))
+        normalisation_factor = 0.5
+        return float(self._kernel_score(-diffusion_kernel, convention) * normalisation_factor)
 
     def random_walk_score(self, alpha: float, p: int, convention: str | None = None):
         """
