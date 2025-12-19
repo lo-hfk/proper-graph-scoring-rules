@@ -46,14 +46,19 @@ class NodeSelectionTask:
 
     def _kernel_score(self, cnd_kernel: np.ndarray, convention: str | None = None):
         """
+        Score of the form
+            S(p, i) = - 0.5 * (p - e_i)^T @ G @ (p - e_i) + 0.5 * G[i,i]     (convention=None)
+        or
+            S(p, i) = - 0.5 * (p - e_i)^T @ G @ (p - e_i)                    (convention="positive")
+        where G is a cnd kernel matrix, p is the vector of node probabilities, and i is the true node.
+
         Parameters
         ----------
         cnd_kernel : np.ndarray (n, n)
             Conditionally negative definite kernel matrix.
         convention : str
             Defaults to the definition by [Gneiting/Raftery, 2007].
-            If set to "positive", subtract cnd_kernel[true_node, true_node]/2 which ensures non-negative scores
-                [Ziegel/Ginsbourger/Duembgen, 2022].
+            Setting convention="positive" [Ziegel/Ginsbourger/Duembgen, 2022] ensures non-negative scores.
 
         Returns
         -------
