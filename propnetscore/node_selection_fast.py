@@ -51,14 +51,14 @@ class NodeSelectionTaskFast(NodeSelectionTask):
         print(f" --- Computed resistance score in Julia in {time.time() - start:.3f}s")
         return float(score)
 
-    def diffusion_score_fast(self, kappa2: float, convention: str | None = None):
+    def diffusion_score_fast(self, tau: float, convention: str | None = None):
         """
         Proper scoring rule based on the diffusion kernel but with a fast implementation based on expm_multiply
         (only matrix-vector products instead of full matrix exponentiation).
 
         Parameters
         ----------
-        kappa2 : float (non-negative)
+        tau : float (non-negative)
             Inverse length scale
         convention : str
             Kernel score convention (None or "positive")
@@ -69,8 +69,8 @@ class NodeSelectionTaskFast(NodeSelectionTask):
             self.sparse_laplacian = csc_matrix(self.laplacian)
 
         vector = standard_basis_vec(size=len(self.node_probs), i=self.true_node) - self.node_probs # e_i - p
-        # the score with convention = "positive" is 0.5 * (e_i - p)^T H (e_i - p) where H = exp(-0.5 * kappa2 * L)
-        # and expm_multiply computes e(-0.5 * kappa2 * L) @ vector efficiently without forming the full matrix
-        score = 0.5 * vector @ expm_multiply(-0.5 * kappa2 * self.sparse_laplacian, vector)
+        # the score with convention = "positive" is 0.5 * (e_i - p)^T H (e_i - p) where H = exp(-0.5 * tau * L)
+        # and expm_multiply computes e(-0.5 * tau * L) @ vector efficiently without forming the full matrix
+        score = 0.5 * vector @ expm_multiply(-0.5 * tau * self.sparse_laplacian, vector)
         return float(score)
 

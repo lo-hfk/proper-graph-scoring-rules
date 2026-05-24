@@ -27,22 +27,46 @@ class NodeSelectionTask:
         self.normalised_laplacian = None  # compute only when necessary
         self.laplacian_inv = None  # compute only when necessary
         self.resistance = None  # compute only when necessary
+        self.dist = None  # compute only when necessary
 
     def _get_degree_matrix(self):
-        return np.diag(np.sum(self.adjacency_matrix, axis=1))
+        if self.degree_matrix is None:
+            self.degree_matrix = np.diag(np.sum(self.adjacency_matrix, axis=1))
+        return self.degree_matrix
 
     def _get_laplacian(self):
         if self.degree_matrix is None:
             self.degree_matrix = self._get_degree_matrix()
-        return self.degree_matrix - self.adjacency_matrix
+        self.laplacian = self.degree_matrix - self.adjacency_matrix
+        return self.laplacian
 
     def _get_normalised_laplacian(self):
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
         if self.degree_matrix is None:
             self.degree_matrix = self._get_degree_matrix()
-        sqrt_degree_matrix = np.sqrt(self.degree_matrix)
-        return sqrt_degree_matrix @ self.laplacian @ sqrt_degree_matrix
+        if self.normalised_laplacian is None:
+            sqrt_degree_matrix = np.sqrt(self.degree_matrix)
+            self.normalised_laplacian = sqrt_degree_matrix @ self.laplacian @ sqrt_degree_matrix
+        return self.normalised_laplacian
+
+    def _get_shortest_paths_matrix(self):
+        """Compute all-pairs shortest paths using Floyd-Warshall algorithm.
+
+        Uses vectorized implementation adapted from:
+        https://gist.github.com/mosco/11178777
+        """
+        if self.dist is None:
+            dist = self.adjacency_matrix.astype(float).copy()
+            dist[dist == 0] = np.inf
+            np.fill_diagonal(dist, 0)
+
+            # Vectorized Floyd-Warshall algorithm
+            for k in range(self.size):
+                dist = np.minimum(dist, dist[:, k, np.newaxis] + dist[np.newaxis, k, :])
+
+            self.dist = dist
+        return self.dist
 
     def _kernel_score(self, cnd_kernel: np.ndarray, convention: str | None = None):
         """
@@ -72,6 +96,11 @@ class NodeSelectionTask:
         else:
             extra_term = 0
         return expected_residual - regularisation + extra_term
+
+    def error_distance(self):
+        """Warning: not a proper scoring rule!"""
+        argmax_all = np.where(self.node_probs == self.node_probs.max())[0]
+        return self._get_shortest_paths_matrix()[self.true_node, argmax_all].mean()
 
     def top_k_accuracy(self, k=1):
         top_k_indices = np.argsort(-self.node_probs)[:k]
@@ -127,20 +156,22 @@ class NodeSelectionTask:
         normalisation_factor = self.size
         return float(self._kernel_score(self.resistance) * normalisation_factor)
 
-    def diffusion_score(self, kappa2: float, convention: str | None = None):
+    def diffusion_score(self, tau: float, convention: str | None = None, mu: float = 0):
         """
         Proper scoring rule based on the diffusion kernel
 
         Parameters
         ----------
-        kappa2 : float (non-negative)
+        tau : float (non-negative)
             Inverse length scale
         convention : str
             Kernel score convention (None or "positive")
+        mu : float (non-negative)
+            Chemical potential; spectral scale for tau -> infinity clustering
         """
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
-        diffusion_kernel = expm(-0.5 * kappa2 * (self.laplacian - np.eye(self.size)))
+        diffusion_kernel = expm(-0.5 * tau * (self.laplacian - mu * np.eye(self.size)))
         normalisation_factor = 0.5
         return float(self._kernel_score(-diffusion_kernel, convention) * normalisation_factor)
 
