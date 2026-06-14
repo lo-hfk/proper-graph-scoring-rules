@@ -128,6 +128,13 @@ class NodeSelectionTask:
         residuals = outcome - self.node_probs
         return float(np.dot(residuals, residuals))
 
+    def weighted_brier_score(self, weights: np.ndarray):
+        outcome = standard_basis_vec(
+            size=self.size, i=self.true_node
+        )
+        residuals = outcome - self.node_probs
+        return float(np.dot(weights * residuals, residuals))
+
     def laplace_score(self, convention: str | None = None):
         """
         Proper scoring rule based on the Laplacian
