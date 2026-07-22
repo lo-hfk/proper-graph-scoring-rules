@@ -163,7 +163,7 @@ class NodeSelectionTask:
         normalisation_factor = self.size
         return float(self._kernel_score(self.resistance) * normalisation_factor)
 
-    def diffusion_score(self, tau: float, convention: str | None = None, mu: float = 0):
+    def diffusion_score(self, tau: float, convention: str | None = None, mu: float = 0, normalise: bool = False):
         """
         Proper scoring rule based on the diffusion kernel
 
@@ -174,11 +174,19 @@ class NodeSelectionTask:
         convention : str
             Kernel score convention (None or "positive")
         mu : float (non-negative)
-            Chemical potential; spectral scale for tau -> infinity clustering
+            Chemical potential; spectral scale for tau -> infinity clustering.
+            Note: mu only rescales the kernel by a global positive constant
+            e^{0.5*tau*mu}, so if normalise=True this constant cancels and
+            mu has no effect on the result.
+        normalise : bool
+            If True, rescale the diffusion kernel to have unit trace
+            (i.e. divide by tr(diffusion_kernel)) before scoring.
         """
         if self.laplacian is None:
             self.laplacian = self._get_laplacian()
         diffusion_kernel = expm(-0.5 * tau * (self.laplacian - mu * np.eye(self.size)))
+        if normalise:
+            diffusion_kernel = diffusion_kernel / np.trace(diffusion_kernel)
         normalisation_factor = 0.5
         return float(self._kernel_score(-diffusion_kernel, convention) * normalisation_factor)
 
