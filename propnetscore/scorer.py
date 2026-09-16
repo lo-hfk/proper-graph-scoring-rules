@@ -37,9 +37,17 @@ class GraphScorer:
         Parameters
         ----------
         adjacency_matrix : np.ndarray (n, n)
-            Adjacency matrix of the graph. Assumed symmetric (i.e. undirected).
+            Adjacency matrix of an undirected unweighted graph without self-loops.
             Shared across all scored instances.
         """
+        # Check adjacency satisfies the assumptions
+        if adjacency_matrix.ndim != 2 or adjacency_matrix.shape[0] != adjacency_matrix.shape[1]:
+            raise ValueError("adjacency_matrix must be square.")
+        if not np.allclose(adjacency_matrix, adjacency_matrix.T):
+            raise ValueError("adjacency_matrix must be symmetric (undirected graph).")
+        if np.any(np.diag(adjacency_matrix) != 0):
+            raise ValueError("adjacency_matrix must have zero diagonal (no self-loops).")
+
         self.adjacency_matrix = adjacency_matrix
         self.size = adjacency_matrix.shape[0]
 
