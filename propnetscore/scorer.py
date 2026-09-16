@@ -30,7 +30,7 @@ class GraphScorer:
     Returns
     -------
     np.ndarray (m,)
-        One score per row.
+        One score per row. For all scores, lower values are better.
     """
     def __init__(self, adjacency_matrix: np.ndarray):
         """
@@ -220,19 +220,13 @@ class GraphScorer:
             out[row] = sp[true_nodes[row], argmax_all].mean()
         return out
 
-    def top_k_accuracy(self, P: np.ndarray, true_nodes: np.ndarray, k: int = 1):
-        """Top-k hit.
-        Returns 1 if the true node is in the top-k nodes according to P; 0 else.
+    def top_k_error(self, P: np.ndarray, true_nodes: np.ndarray, k: int = 1):
+        """ Top-k miss indicator:
+        Returns 1 if the true node is not in the top-k nodes according to P; 0 else.
         """
         self._check_inputs(P, true_nodes)
         top_k_idx = np.argpartition(-P, kth=k - 1, axis=1)[:, :k]  # argpartition is more efficient than a full argsort
-        return (top_k_idx == true_nodes[:, None]).any(axis=1).astype(float)
-
-    def top_k_error_rate(self, P: np.ndarray, true_nodes: np.ndarray, k: int = 1):
-        """Top-k error.
-        Returns 1 if the true node is not in the top-k nodes according to P; 0 else.
-        """
-        return 1.0 - self.top_k_accuracy(P, true_nodes, k=k)
+        return (~(top_k_idx == true_nodes[:, None]).any(axis=1)).astype(float)
 
     def rank_score(self, P: np.ndarray, true_nodes: np.ndarray):
         """1-indexed rank of the true node.
@@ -255,13 +249,18 @@ class GraphScorer:
         # The average of these ranks is the average of the first and last:
         return strictly_greater + (tied + 1) / 2.0
 
-    def inverse_rank_score(self, P: np.ndarray, true_nodes: np.ndarray):
-        return 1.0 / self.rank_score(P, true_nodes)
-
     def logarithmic_score(self, P: np.ndarray, true_nodes: np.ndarray):
         """Logarithmic score, also known as cross-entropy."""
         self._check_inputs(P, true_nodes)
         return -np.log(P[np.arange(P.shape[0]), true_nodes])
+
+    def brier_score(self, P: np.ndarray, true_nodes: np.ndarray):
+        self._check_inputs(P, true_nodes)
+        m = P.shape[0]
+        onehot = np.zeros((m, self.size))
+        onehot[np.arange(m), true_nodes] = 1.0
+        residuals = onehot - P
+        return np.einsum('mi,mi->m', residuals, residuals)
 
     def weighted_brier_score(self, P: np.ndarray, true_nodes: np.ndarray, weights: np.ndarray):
         """Brier score with different weights for each node."""
@@ -271,14 +270,6 @@ class GraphScorer:
         onehot[np.arange(m), true_nodes] = 1.0
         residuals = onehot - P
         return np.einsum('mi,i,mi->m', residuals, weights, residuals)
-
-    def brier_score(self, P: np.ndarray, true_nodes: np.ndarray):
-        self._check_inputs(P, true_nodes)
-        m = P.shape[0]
-        onehot = np.zeros((m, self.size))
-        onehot[np.arange(m), true_nodes] = 1.0
-        residuals = onehot - P
-        return np.einsum('mi,mi->m', residuals, residuals)
 
     def laplace_score(self, P: np.ndarray, true_nodes: np.ndarray, convention: str = "positive"):
         return self._kernel_score_batch(P, true_nodes, -self.laplacian, convention)
