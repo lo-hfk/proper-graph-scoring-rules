@@ -84,7 +84,11 @@ class GraphScorer:
 
     @property
     def shortest_paths(self):
-        """All-pairs shortest paths via vectorised Floyd-Warshall."""
+        """
+        All-pairs shortest paths via vectorised Floyd-Warshall.
+        Vectorised implementation adapted from:
+        https://gist.github.com/mosco/11178777
+        """
         if self._shortest_paths is None:
             dist = self.adjacency_matrix.astype(float).copy()
             dist[dist == 0] = np.inf
