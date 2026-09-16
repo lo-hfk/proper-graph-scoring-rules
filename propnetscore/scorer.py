@@ -1,14 +1,5 @@
 """
-Vectorised implementation of the node selection scoring rules.
-
-Each instance of GraphScorer takes a fixed graph with n nodes.
-Everything that depends only on the graph (Laplacian, its pseudoinverse,
-resistance distances, diffusion kernel matrix, shortest paths matrix) is
-computed once and cached on the GraphScorer instance.
-
-Each score is implemented as a method of GraphScorer that takes m probability
-distributions P (shape (m, n)) and corresponding true_nodes (shape (m,))
-and returns an array of m scores.
+Vectorised batched implementation of the node selection scoring rules.
 """
 
 import numpy as np
@@ -16,12 +7,38 @@ from scipy.linalg import expm
 
 
 class GraphScorer:
+    """
+    Scoring rules for probabilistic node selection on a fixed graph.
+
+    All graph-level quantities (Laplacian, pseudoinverse, resistance distances,
+    shortest paths) are computed lazily on first access and cached on the
+    instance, so they are computed at most once regardless of how many
+    scoring calls are made.
+
+    All public scoring methods share the same signature:
+
+        score(P, true_nodes) -> np.ndarray
+
+    Parameters
+    ----------
+    P : np.ndarray (m, n)
+        Batch of m probability distributions over the n nodes.
+        Each row must be a valid probability vector.
+    true_nodes : np.ndarray (m,), dtype int
+        True node index for each row of P. Values in [0, n).
+
+    Returns
+    -------
+    np.ndarray (m,)
+        One score per row.
+    """
     def __init__(self, adjacency_matrix: np.ndarray):
         """
         Parameters
         ----------
         adjacency_matrix : np.ndarray (n, n)
-            Adjacency matrix of the graph. Shared across all scored instances.
+            Adjacency matrix of the graph. Assumed symmetric (i.e. undirected).
+            Shared across all scored instances.
         """
         self.adjacency_matrix = adjacency_matrix
         self.size = adjacency_matrix.shape[0]
