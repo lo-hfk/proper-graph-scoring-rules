@@ -17,8 +17,6 @@ class GraphScorer:
 
     All public scoring methods share the same signature:
 
-        score(P, true_nodes) -> np.ndarray
-
     Parameters
     ----------
     P : np.ndarray (m, n)
@@ -30,7 +28,7 @@ class GraphScorer:
     Returns
     -------
     np.ndarray (m,)
-        One score per row. For all scores, lower values are better.
+        One score per row. For all scores, lower values indicate better performance.
     """
     def __init__(self, adjacency_matrix: np.ndarray):
         """
