@@ -4,7 +4,7 @@ Compute expected scores under the true distribution and produce the heatmap tabl
 For each model, computes E_{i~q}[S(p_model, i)] = sum_i q_i * S(p_model, i)
 where q = true_prob from the snapshot CSV.
 
-Scores used (matching the paper):
+Scores used, as in the paper:
   - error_distance, top_1_err, top_3_err, top_5_err, rank
   - brier, resistance
   - diffusion at tau = 0.1, 0.3, 1, 3, 10, 30
@@ -87,12 +87,14 @@ def compute_expected_scores(G, df, model_columns):
     """
     A = nx.to_numpy_array(G, weight=None)
     scorer = GraphScorer(A)
+    # regularisation parameter
+    mu = 0.8  # pragmatic choice: value that gives values of similar order of magnitude for large and small tau
     node_order = list(G.nodes())
     N = len(node_order)
 
     df_ord = df.reindex(node_order).fillna(0.0)
     true_prob = df_ord["true_prob"].values  # q vector
-    true_nodes = np.arange(N)              # score against every node
+    true_nodes = np.arange(N) # score against every node
 
     results = {}
     for model in model_columns:
@@ -110,7 +112,7 @@ def compute_expected_scores(G, df, model_columns):
         }
         for tau in DIFFUSION_TAUS:
             key = f"diff_{str(tau).replace('.', '')}"
-            scores[key] = scorer.diffusion_score(P, true_nodes, tau=tau)
+            scores[key] = scorer.diffusion_score(P, true_nodes, tau=tau, mu=mu)
 
         # expected score under true distribution q
         results[model] = {k: float(np.dot(true_prob, v)) for k, v in scores.items()}
@@ -129,7 +131,7 @@ def plot_heatmap(df, snapshot_name):
     row_labels = [MODEL_DISPLAY.get(r, r) for r in df.index]
 
     # fixed total width like ImageNet table, height scales with number of rows
-    fig, ax = plt.subplots(figsize=(13, n_rows * 0.9))
+    fig, ax = plt.subplots(figsize=(10, n_rows * 0.9))
 
     for i in range(n_rows):
         for j in range(n_cols):
