@@ -14,7 +14,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 
 RESULTS_DIR = Path(__file__).parent.parent / "data" / "results"
 FIGURES_DIR = Path(__file__).parent.parent / "figures"
@@ -61,9 +60,7 @@ def plot_heatmap(df):
     # normalise each column: 0 = best (min), 1 = worst (max)
     norm = (df - df.min()) / (df.max() - df.min())
 
-    cmap = mcolors.LinearSegmentedColormap.from_list(
-        "heatmap", ["#ffffff", "#1a7a3e"], N=256
-    )
+    cmap = plt.cm.Greens
 
     n_rows, n_cols = df.shape
     fig, ax = plt.subplots(figsize=(12, 5))
