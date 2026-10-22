@@ -112,8 +112,8 @@ if __name__ == "__main__":
     fig1, ax1 = plt.subplots(figsize=(5.5, 4.8))
     draw_heatmap(ax1, avg_mat, title="", show_xlabels=True, show_ylabels=True, fontsize=12)
     plt.tight_layout()
-    fig1.savefig(FIGURES_DIR / "spearman_avg.pdf", bbox_inches="tight", dpi=600)
-    fig1.savefig(FIGURES_DIR / "spearman_avg.png", bbox_inches="tight", dpi=600)
+    fig1.savefig(FIGURES_DIR / "spearman_avg.pdf", bbox_inches="tight", dpi=1200)
+    fig1.savefig(FIGURES_DIR / "spearman_avg.png", bbox_inches="tight", dpi=1200)
     print(f"\nSaved spearman_avg")
 
     print("\nAverage Spearman correlation (misclassified images):")
@@ -138,6 +138,6 @@ if __name__ == "__main__":
         )
 
     plt.tight_layout()
-    fig2.savefig(FIGURES_DIR / "spearman_per_model.pdf", bbox_inches="tight", dpi=600)
-    fig2.savefig(FIGURES_DIR / "spearman_per_model.png", bbox_inches="tight", dpi=600)
+    fig2.savefig(FIGURES_DIR / "spearman_per_model.pdf", bbox_inches="tight", dpi=1200)
+    fig2.savefig(FIGURES_DIR / "spearman_per_model.png", bbox_inches="tight", dpi=1200)
     print("Saved spearman_per_model")

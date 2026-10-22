@@ -6,4 +6,4 @@ python dendrograms.py --model-a resnet50_timm --model-b swin_tiny --image-indice
 
 ### Vizsla/moped (image 44101)
 
-dendrograms.py --model-a vit_small_patch16_224 --model-b convnext_tiny --image-indices 44101 --top-k-classes 15 --soft-gt "vizsla:0.5,moped:0.5"
+python dendrograms.py --model-a vit_small_patch16_224 --model-b convnext_tiny --image-indices 44101 --top-k-classes 15 --soft-gt "vizsla:0.5,moped:0.5"

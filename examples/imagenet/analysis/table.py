@@ -104,6 +104,6 @@ if __name__ == "__main__":
 
     fig = plot_heatmap(df)
     out = FIGURES_DIR / "table.pdf"
-    fig.savefig(out, bbox_inches="tight", dpi=600)
-    fig.savefig(FIGURES_DIR / "table.png", bbox_inches="tight", dpi=600)
+    fig.savefig(out, bbox_inches="tight", dpi=1200)
+    fig.savefig(FIGURES_DIR / "table.png", bbox_inches="tight", dpi=1200)
     print(f"\nSaved to {out}")

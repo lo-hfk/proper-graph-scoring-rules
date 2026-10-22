@@ -334,7 +334,7 @@ def draw_dendrogram_figure(subtree, pos, leaf_order,
     ax.set_title(f"Image {image_idx}  \u2014  {true_name_short}",
                  fontsize=12, pad=6, loc="left", fontweight="bold")
 
-    plt.savefig(out_path, dpi=600, bbox_inches="tight")
+    plt.savefig(out_path, dpi=1200, bbox_inches="tight")
     plt.close()
     print(f"  Saved: {out_path.name}")
 
@@ -412,7 +412,7 @@ def draw_scores_table(metrics_a, metrics_b, model_a_name, model_b_name, out_path
             ax.text(cx[col], y, f"{val:.3f}", ha="center", va="center",
                     fontsize=7.5, color=c, fontweight=fw)
 
-    plt.savefig(out_path, dpi=600, bbox_inches="tight")
+    plt.savefig(out_path, dpi=1200, bbox_inches="tight")
     plt.close()
     print(f"  Saved: {out_path.name}")
 

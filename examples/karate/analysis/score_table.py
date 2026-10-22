@@ -54,7 +54,7 @@ SCORE_DISPLAY = {
 MODEL_DISPLAY = {
     "true_prob": "True",
     "static_gnn_n=10000": "GNN",
-    "piecewise_uniform": "Piecewise uniform",
+    "piecewise_uniform": "Piecewise\nuniform",
     "soft_margin_a=0.1_n=1000": "SME",
     "monte_carlo_n=1000": "MCMF",
 }
@@ -131,7 +131,7 @@ def plot_heatmap(df, snapshot_name):
     row_labels = [MODEL_DISPLAY.get(r, r) for r in df.index]
 
     # fixed total width like ImageNet table, height scales with number of rows
-    fig, ax = plt.subplots(figsize=(10, n_rows * 0.9))
+    fig, ax = plt.subplots(figsize=(10, n_rows * 0.7))
 
     for i in range(n_rows):
         for j in range(n_cols):
@@ -158,9 +158,9 @@ def plot_heatmap(df, snapshot_name):
 
     plt.tight_layout()
     out = FIGURES_DIR / f"score_table_{snapshot_name}.pdf"
-    fig.savefig(out, bbox_inches="tight", dpi=600)
+    fig.savefig(out, bbox_inches="tight", dpi=1200)
     fig.savefig(FIGURES_DIR / f"score_table_{snapshot_name}.png",
-                bbox_inches="tight", dpi=600)
+                bbox_inches="tight", dpi=1200)
     plt.close()
     print(f"Saved: {out.name}")
 

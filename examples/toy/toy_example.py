@@ -203,7 +203,7 @@ if __name__ == "__main__":
         "Log-loss": scorer.logarithmic_score(P, true_nodes),
         "Top-4 error": scorer.top_k_error(P, true_nodes, k=4),
         "Brier": scorer.brier_score(P, true_nodes),
-        "Error distance": scorer.error_distance(P, true_nodes),
+        "avg. Error distance": scorer.error_distance(P, true_nodes),
         "Resistance": scorer.resistance_score(P, true_nodes),
         r"Diffusion($\tau$=0.1)": scorer.diffusion_score(P, true_nodes, tau=0.1, mu=mu),
         r"Diffusion($\tau$=1)": scorer.diffusion_score(P, true_nodes, tau=1, mu=mu),
