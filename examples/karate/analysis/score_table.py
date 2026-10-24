@@ -52,11 +52,11 @@ SCORE_DISPLAY = {
 }
 
 MODEL_DISPLAY = {
-    "true_prob": "True",
-    "static_gnn_n=10000": "GNN",
-    "piecewise_uniform": "Piecewise\nuniform",
-    "soft_margin_a=0.1_n=1000": "SME",
-    "monte_carlo_n=1000": "MCMF",
+    "true_prob": "b)",# "True"
+    "static_gnn_n=10000": "c)",# "GNN"
+    "piecewise_uniform": "d)",# "Piecewise\nuniform"
+    "soft_margin_a=0.1_n=1000": "e)",# "SME"
+    "monte_carlo_n=1000": "f)"# "MCMF"
 }
 
 
@@ -85,14 +85,21 @@ def compute_expected_scores(G, df, model_columns):
 
     Returns a DataFrame with models as columns and scores as rows.
     """
-    A = nx.to_numpy_array(G, weight=None)
+    # Fix one explicit node order and use it for BOTH the adjacency matrix and the
+    # probability vectors. (G.nodes() is not sorted in network.gpickle, so the
+    # rows of A and the rows of the CSV must be aligned explicitly.)
+    node_order = sorted(G.nodes())
+    N = len(node_order)
+    missing = set(df.index) ^ set(node_order)
+    if missing:
+        raise ValueError(f"CSV nodes and graph nodes differ: {sorted(missing)}")
+
+    A = nx.to_numpy_array(G, nodelist=node_order, weight=None)
     scorer = GraphScorer(A)
     # regularisation parameter
     mu = 0.8  # pragmatic choice: value that gives values of similar order of magnitude for large and small tau
-    node_order = list(G.nodes())
-    N = len(node_order)
 
-    df_ord = df.reindex(node_order).fillna(0.0)
+    df_ord = df.loc[node_order]
     true_prob = df_ord["true_prob"].values  # q vector
     true_nodes = np.arange(N) # score against every node
 

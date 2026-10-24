@@ -107,7 +107,7 @@ def plot_graphs(G, distributions, pos):
 # -----------------------------------------------------------------
 def compute_scores(scorer, P, true_nodes, mu):
     scores = {}
-    scores["Top-4 error rate"] = scorer.top_k_error(P, true_nodes, k=4)
+    scores["Top-4 error"] = scorer.top_k_error(P, true_nodes, k=4)
     scores["Brier"] = scorer.brier_score(P, true_nodes)
     scores["Resistance"] = scorer.resistance_score(P, true_nodes)
     scores[r"Diffusion($\tau$=0.1)"] = scorer.diffusion_score(P, true_nodes, tau=0.1, mu=mu)

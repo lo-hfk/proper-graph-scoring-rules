@@ -3,7 +3,7 @@ Vectorised batched implementation of the node selection scoring rules.
 """
 
 import numpy as np
-from scipy.linalg import expm
+from scipy.linalg import expm, pinvh
 
 
 class GraphScorer:
@@ -74,14 +74,22 @@ class GraphScorer:
     @property
     def laplacian_pinv(self):
         if self._laplacian_pinv is None:
-            self._laplacian_pinv = np.linalg.pinv(self.laplacian)
+            # L is symmetric PSD with an exact zero eigenvalue (constant vector).
+            # np.linalg.pinv (SVD, default rcond=1e-15) can fail to discard that
+            # eigenvalue when rounding puts it at ~1e-14 * s_max, which injects a
+            # ~1e12 * 11^T/n term and destroys symmetry after cancellation in R.
+            # pinvh uses eigh and the more conservative cutoff n * eps * |lambda|_max.
+            self._laplacian_pinv = pinvh(self.laplacian)
         return self._laplacian_pinv
 
     @property
     def resistance(self):
         if self._resistance is None:
             diag = np.diag(self.laplacian_pinv)
-            self._resistance = diag[:, None] + diag[None, :] - 2 * self.laplacian_pinv
+            R = diag[:, None] + diag[None, :] - 2 * self.laplacian_pinv
+            if not np.allclose(R, R.T, atol=1e-10):
+                raise FloatingPointError("Resistance matrix is not symmetric; Laplacian pseudoinverse is inaccurate.")
+            self._resistance = 0.5 * (R + R.T)
         return self._resistance
 
     @property

@@ -12,6 +12,7 @@ import warnings
 
 import numpy as np
 import networkx as nx
+from scipy.sparse.csgraph import shortest_path
 
 from .scorer import GraphScorer
 
@@ -142,6 +143,8 @@ class HierarchicalScorer:
         self._node_to_idx = {n: k for k, n in enumerate(nodes)}  # this defines the node indexing 0,...,n-1 in the full graph
         A = nx.to_numpy_array(tree.to_undirected(), nodelist=nodes)  # adjacency matrix of the undirected tree with the same indexing
         self._graph_scorer = GraphScorer(A)
+        # On a tree the resistance distance equals the shortest-path length, which is more stable to compute:
+        self._graph_scorer._resistance = shortest_path(A, method="D", directed=False, unweighted=True)
         self._leaf_to_graph_idx = np.array(
             [self._node_to_idx[l] for l in leaves], dtype=np.int64  # map leaves to their corresponding indices in the full graph
         )

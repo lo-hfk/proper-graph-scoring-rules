@@ -141,7 +141,7 @@ def plot_networks(G, df, model_columns, snapshot_name, pos):
                     title="(b) True distribution")
 
     # (c)-(f) model estimates
-    panels = [(0, 1), (0, 2), (1, 1), (1, 2)]
+    panels = [(0, 1), (1, 1), (0, 2), (1, 2)]
     labels = ["(c)", "(d)", "(e)", "(f)"]
     for (row, col), lbl, model in zip(panels, labels, model_columns):
         probs = df_full[model].to_dict() if model in df_full.columns else {}

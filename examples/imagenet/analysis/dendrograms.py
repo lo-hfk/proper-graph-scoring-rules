@@ -2,10 +2,10 @@
 Dendrogram-style qualitative example visualisation.
 
 For a given pair of models and one or more image indices, produces:
-  - figures/dendro_<idx>_<model_a>_vs_<model_b>.png           : dendrogram (publication)
-  - figures/dendro_<idx>_<model_a>_vs_<model_b>_annotated.png : with internal node labels
-  - figures/dendro_<idx>_<model_a>_vs_<model_b>_scores.png    : scores comparison table
-  - figures/image_<idx>.png                                    : extracted image
+  - figures/dendro_<idx>_<model_a>_vs_<model_b>.pdf           : dendrogram (publication)
+  - figures/dendro_<idx>_<model_a>_vs_<model_b>_annotated.pdf : with internal node labels
+  - figures/dendro_<idx>_<model_a>_vs_<model_b>_scores.pdf    : scores comparison table
+  - figures/image_<idx>.pdf                                    : extracted image
 
 Leaf selection (choose one; default: cumulative threshold 0.85):
   --prob-threshold T      show all classes assigned probability >= T by either model
@@ -366,8 +366,8 @@ def draw_scores_table(metrics_a, metrics_b, model_a_name, model_b_name, out_path
     color_a, color_b = "#1565C0", "#BF360C"
 
     n_rows = len(metric_rows)
-    row_h  = 0.45
-    col_w  = [2.2, 1.8, 1.8]
+    row_h = 0.30  # 0.45
+    col_w = [2.0, 1.5, 1.5]  # [2.2, 1.8, 1.8]
     pad    = 0.15
     fig_w  = sum(col_w) + 2 * pad
     fig_h  = row_h * (n_rows + 1) + 0.15
@@ -494,8 +494,8 @@ def main():
         print(f"  Subtree: {subtree.number_of_nodes()} nodes, {len(leaf_order)} leaves")
 
         stub     = f"{args.model_a}_vs_{args.model_b}"
-        fig_path = FIGURES_DIR / f"dendro_{img_idx:05d}_{stub}.png"
-        tbl_path = FIGURES_DIR / f"dendro_{img_idx:05d}_{stub}_scores.png"
+        fig_path = FIGURES_DIR / f"dendro_{img_idx:05d}_{stub}.pdf"
+        tbl_path = FIGURES_DIR / f"dendro_{img_idx:05d}_{stub}_scores.pdf"
 
         kw = dict(
             subtree=subtree, pos=pos, leaf_order=leaf_order,
@@ -512,7 +512,7 @@ def main():
         )
         draw_dendrogram_figure(**kw, out_path=fig_path, annotate_nodes=False)
         # annotated version for internal use only
-        ann_path = FIGURES_DIR / f"dendro_{img_idx:05d}_{stub}_annotated.png"
+        ann_path = FIGURES_DIR / f"dendro_{img_idx:05d}_{stub}_annotated.pdf"
         draw_dendrogram_figure(**kw, out_path=ann_path, annotate_nodes=True)
         draw_scores_table(ma, mb, model_a_name, model_b_name, tbl_path)
 
@@ -539,13 +539,13 @@ def main():
                 return result
             ma_soft = expected_metrics(p_a)
             mb_soft = expected_metrics(p_b)
-            soft_path = FIGURES_DIR / f"dendro_{img_idx:05d}_{stub}_scores_soft.png"
+            soft_path = FIGURES_DIR / f"dendro_{img_idx:05d}_{stub}_scores_soft.pdf"
             draw_scores_table(ma_soft, mb_soft, model_a_name, model_b_name, soft_path)
 
         # save image
         try:
             img = load_image(img_idx)
-            img.save(FIGURES_DIR / f"image_{img_idx:05d}.png")
+            img.save(FIGURES_DIR / f"image_{img_idx:05d}.pdf")
         except Exception as e:
             print(f"  WARNING: image load failed: {e}")
 
