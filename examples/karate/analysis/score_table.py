@@ -166,8 +166,7 @@ def plot_heatmap(df, snapshot_name):
     plt.tight_layout()
     out = FIGURES_DIR / f"score_table_{snapshot_name}.pdf"
     fig.savefig(out, bbox_inches="tight", dpi=1200)
-    fig.savefig(FIGURES_DIR / f"score_table_{snapshot_name}.png",
-                bbox_inches="tight", dpi=1200)
+
     plt.close()
     print(f"Saved: {out.name}")
 

@@ -151,9 +151,8 @@ def plot_networks(G, df, model_columns, snapshot_name, pos):
 
     plt.tight_layout()
     out = FIGURES_DIR / f"network_{snapshot_name}.pdf"
-    fig.savefig(out, bbox_inches="tight", dpi=600)
-    fig.savefig(FIGURES_DIR / f"network_{snapshot_name}.png",
-                bbox_inches="tight", dpi=600)
+    fig.savefig(out, bbox_inches="tight", dpi=1200)
+
     plt.close()
     print(f"Saved: {out.name}")
 
@@ -166,7 +165,7 @@ def plot_calibration(df, model_columns, snapshot_name):
         "axes.spines.right": False,
     })
 
-    fig, axs = plt.subplots(2, 2, figsize=(4, 4), dpi=600,
+    fig, axs = plt.subplots(2, 2, figsize=(4, 4), dpi=1200,
                              sharex=True, sharey=True)
     color = plt.rcParams["axes.prop_cycle"].by_key()["color"][0]
 
