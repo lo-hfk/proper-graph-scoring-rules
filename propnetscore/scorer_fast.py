@@ -109,7 +109,7 @@ class FastGraphScorer(GraphScorer):
         """Diffusion score via expm_multiply (no full matrix exponential).
 
         For each row p of P and corresponding true node i, computes
-            2 * (p - e_i)^T H (p - e_i)
+            (p - e_i)^T H (p - e_i)
         where H = exp(-tau/2 * (L - mu * I)), using a Krylov subspace
         approximation via scipy.sparse.linalg.expm_multiply.
 
@@ -163,6 +163,6 @@ class FastGraphScorer(GraphScorer):
             e[true_nodes[row]] = 1.0
             v = P[row] - e  # v = p - e_i
             Hv = expm_multiply(A, v)  # H @ v via Krylov subspace
-            out[row] = 2.0 * float(v @ Hv)
+            out[row] = float(v @ Hv)
             e[true_nodes[row]] = 0.0
         return out
