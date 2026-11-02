@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="propernetscore",
+    name="propnetscore",
     version="0.1.0",
     description="Proper scoring rules for graph-learning tasks",
     author="Lorenz Hilfiker, Nathan Brack, Martin Sterchi",

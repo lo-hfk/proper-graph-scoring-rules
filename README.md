@@ -125,7 +125,7 @@ Examples from the paper:
 If you use this code, please cite:
 
 ```bibtex
-@misc{hilfiker2026propernetscore,
+@misc{hilfiker2026propnetscore,
   author = {Hilfiker, Lorenz and Cincera Brack, Nathan and Sterchi, Martin},
   title  = {Strictly proper scoring rules for node selection tasks on graphs},
   year   = {2026},
