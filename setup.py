@@ -5,7 +5,7 @@ setup(
     version="0.1.0",
     description="Proper scoring rules for graph-learning tasks",
     author="Lorenz Hilfiker, Nathan Brack, Martin Sterchi",
-    packages=find_packages(),  # Automatically finds the propernetscore/ package
+    packages=find_packages(),  # automatically finds the propernetscore/ package
     install_requires=[
         "numpy", "scipy"
     ],

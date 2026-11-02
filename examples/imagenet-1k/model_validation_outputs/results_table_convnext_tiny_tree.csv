@@ -1,2 +1,0 @@
-model,top1_acc,top5_acc,brier_flat,logloss_flat,distance_at_1,distance_at_5,resistance_score,hxe_score
-convnext_tiny,0.82066,0.95856,0.26330096,0.7820947,1.33428,6.464688000000001,1837.3725913936341,0.04812887450914999
