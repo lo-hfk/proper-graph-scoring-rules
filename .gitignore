@@ -295,25 +295,9 @@ http-client.private.env.json
 # Mac OS trash
 .DS_Store
 
-# gitignore Nathan's playground files
-examples/laplacian_julia.ipynb
-examples/krylov_exponential.ipynb
-
 # gitignore config files with real paths (keep only example config files)
 examples/imagenet/config.py
 
-# gitignore imagenet model outputs and graph cache
+# gitignore imagenet model outputs
 examples/imagenet/data/probs/
-examples/imagenet-1k/model_validation_outputs/probs_convnext_tiny.npy
-examples/imagenet-1k/model_validation_outputs/probs_efficientnet_b0.npy
-examples/imagenet-1k/model_validation_outputs/probs_efficientnet_b2.npy
-examples/imagenet-1k/model_validation_outputs/probs_mobilenet_v3_large.npy
-examples/imagenet-1k/model_validation_outputs/probs_mobilenet_v3_small.npy
-examples/imagenet-1k/model_validation_outputs/probs_resnet18.npy
-examples/imagenet-1k/model_validation_outputs/probs_resnet50_timm.npy
-examples/imagenet-1k/model_validation_outputs/probs_shufflenet_v2_x1_0.npy
-examples/imagenet-1k/model_validation_outputs/probs_swin_tiny.npy
-examples/imagenet-1k/model_validation_outputs/probs_vit_small_patch16_224.npy
-examples/imagenet-1k/model_validation_outputs/graph_scorer_cache_ctree.pkl
-examples/imagenet-1k/model_validation_outputs/graph_scorer_cache_dag.pkl
-examples/imagenet-1k/model_validation_outputs/graph_scorer_cache_tree.pkl
+
