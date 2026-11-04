@@ -126,10 +126,13 @@ If you use this code, please cite:
 
 ```bibtex
 @misc{hilfiker2026propnetscore,
-  author = {Hilfiker, Lorenz and Cincera Brack, Nathan and Sterchi, Martin},
-  title  = {Strictly proper scoring rules for node selection tasks on graphs},
-  year   = {2026},
-  note   = {arXiv preprint}
+      title={Strictly proper scoring rules for node selection tasks on graphs}, 
+      author={Lorenz Hilfiker and Nathan Cincera Brack and Martin Sterchi},
+      year={2026},
+      eprint={2611.03274},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2611.03274}, 
 }
 ```
 
