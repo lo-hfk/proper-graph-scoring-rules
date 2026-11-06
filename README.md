@@ -17,8 +17,7 @@ pip install .
 ```
 
 This installs the package under the import name `propnetscore` with its core dependencies (`numpy`,
-`scipy`). `networkx` is not required by the package itself, but the examples below and in `examples/` use
-it to build graphs, so you will likely want it too (`pip install networkx`).
+`scipy`, `networkx`).
 
 
 ### Optional: fast scorer for large sparse graphs

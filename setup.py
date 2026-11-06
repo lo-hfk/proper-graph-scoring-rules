@@ -7,11 +7,11 @@ setup(
     author="Lorenz Hilfiker, Nathan Brack, Martin Sterchi",
     packages=find_packages(),  # automatically finds the propernetscore/ package
     install_requires=[
-        "numpy", "scipy"
+        "numpy", "scipy", "networkx"
     ],
     extras_require={
         "julia": ["juliacall"],
-        "dev": ["pytest", "jupyter", "networkx"],
+        "dev": ["pytest", "jupyter"],
     },
     python_requires=">=3.8",
 )
